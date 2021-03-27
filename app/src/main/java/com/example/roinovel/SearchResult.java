@@ -91,7 +91,7 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
                 progressBar.setMax((Integer) msg.obj);
                 progressBar.setProgress(msg.arg2);
             }else{
-                Toast.makeText(SearchResult.this,"下载失败，请重试！",Toast.LENGTH_LONG).show();
+                Toast.makeText(SearchResult.this,"下载失败，请重试！",Toast.LENGTH_SHORT).show();
             }
         }
     };

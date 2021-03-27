@@ -37,10 +37,15 @@ public class NovelAdapter extends ArrayAdapter<Novel>{
             viewHolder = new ViewHolder();
             viewHolder.textView = view.findViewById(R.id.novel_name);
             viewHolder.progressBar = view.findViewById(R.id.down_process);
+            viewHolder.progressBar.setTag(novel.Name);
             view.setTag(viewHolder);
         }else{
             view = ConvertView;
             viewHolder = (ViewHolder) view.getTag();
+        }
+        if (((String)viewHolder.progressBar.getTag()).compareTo(novel.Name) != 0)
+        {
+            viewHolder.progressBar.setVisibility(View.GONE);
         }
         viewHolder.textView.setText(novel.string());
         return view;
