@@ -1,10 +1,13 @@
 package com.example.roinovel;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,10 +21,8 @@ import com.example.roinovel.Novel.Novel;
 import com.example.roinovel.Novel.ShuQuGe_Download;
 import com.example.roinovel.listview.NovelAdapter;
 
-import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,9 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
     private static List<Novel> novelArrayList = new ArrayList<>();
     private Novel novel;
     private ProgressBar progressBar;
+    private ListView listView;
+    private Map<Integer, String> content;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +44,7 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_search_result);
         novelArrayList = MainActivity.novels;
         NovelAdapter novelAdapter = new NovelAdapter(this,R.layout.novel_item,novelArrayList);
-        ListView listView = findViewById(R.id.listView);
+        listView = findViewById(R.id.listView);
         listView.setAdapter(novelAdapter);
         listView.setOnItemClickListener(this);
     }
@@ -52,9 +56,56 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
         novel = novelArrayList.get(position);
 
         Toast.makeText(this,"你点击了" + novel.Name + "，现在开始下载，请稍等……", Toast.LENGTH_LONG).show();
-        progressBar = view.findViewById(R.id.down_process);
+//        progressBar = view.findViewById(R.id.down_process);
+        progressBar = (ProgressBar) listView.findViewWithTag(novel.Name);
         progressBar.setVisibility(View.VISIBLE);
         NovelDownload(novel.url);
+    }
+
+
+
+    public void FileSave()
+    {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/txt");
+        intent.putExtra(Intent.EXTRA_TITLE, novel.Name+".txt");
+
+        // Optionally, specify a URI for the directory that should be opened in
+        // the system file picker when your app creates the document.
+
+        startActivityForResult(intent, 1);
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode,
+                                 Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            Uri uri = null;
+            if (resultData != null) {
+                uri = resultData.getData();
+                ParcelFileDescriptor pfd = null;
+                try {
+                    pfd = getContentResolver().openFileDescriptor(uri, "w");
+                    FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
+                    for (Integer i: content.keySet())
+                    {
+                        fileOutputStream.write(content.get(i).getBytes());
+                    }
+                    fileOutputStream.close();
+                    pfd.close();
+                    Toast.makeText(SearchResult.this,"文件写入成功！",Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "onActivityResult: FileWrite Error!" );
+                }
+
+            }
+        }
     }
 
 
@@ -65,28 +116,9 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
         public void handleMessage(Message msg) {
             if (msg.arg1 == 1)
             {
-                Map<Integer, String> content = (Map<Integer, String>) msg.obj;
-                FileOutputStream out;
-                BufferedWriter writer = null;
-                try {
-                    out = openFileOutput(novel.Name + ".txt", Context.MODE_PRIVATE);
-                    writer = new BufferedWriter(new OutputStreamWriter(out));
-                    for (Integer i: content.keySet())
-                    {
-                        writer.write(content.get(i));
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }finally {
-                    if (writer != null) {
-                        try {
-                            writer.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                Toast.makeText(SearchResult.this,"文件写入成功！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(SearchResult.this,"请选择保存文件的目录",Toast.LENGTH_SHORT).show();
+                content = (Map<Integer, String>) msg.obj;
+                FileSave();
             }else if (msg.arg1 == 3){
                 progressBar.setMax((Integer) msg.obj);
                 progressBar.setProgress(msg.arg2);
