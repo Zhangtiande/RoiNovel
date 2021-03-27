@@ -158,7 +158,6 @@ public class DownThread extends java.lang.Thread {
             con = con + temp + '\n';
         }
         con = this.title + '\n' + con + "\n\n";
-        System.out.println("Get：" + this.title);
         ((ShuQuGe_Download)parent).getLen++;
         return true;
     }

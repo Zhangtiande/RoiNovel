@@ -2,7 +2,6 @@ package com.example.roinovel;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,7 +32,6 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
     private static final String TAG = "SearchResult";
     private static List<Novel> novelArrayList = new ArrayList<>();
     private Novel novel;
-    private Map<Integer,String> Content;
     private ProgressBar progressBar;
 
     @Override
@@ -41,10 +39,8 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_result);
         novelArrayList = MainActivity.novels;
-        Intent intent = getIntent();
-        String success = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
         NovelAdapter novelAdapter = new NovelAdapter(this,R.layout.novel_item,novelArrayList);
-        ListView listView = (ListView) findViewById(R.id.listView);
+        ListView listView = findViewById(R.id.listView);
         listView.setAdapter(novelAdapter);
         listView.setOnItemClickListener(this);
     }
@@ -69,15 +65,15 @@ public class SearchResult extends AppCompatActivity implements AdapterView.OnIte
         public void handleMessage(Message msg) {
             if (msg.arg1 == 1)
             {
-                Content = (Map<Integer, String>) msg.obj;
-                FileOutputStream out = null;
+                Map<Integer, String> content = (Map<Integer, String>) msg.obj;
+                FileOutputStream out;
                 BufferedWriter writer = null;
                 try {
                     out = openFileOutput(novel.Name + ".txt", Context.MODE_PRIVATE);
                     writer = new BufferedWriter(new OutputStreamWriter(out));
-                    for (Integer i:Content.keySet())
+                    for (Integer i: content.keySet())
                     {
-                        writer.write(Content.get(i));
+                        writer.write(content.get(i));
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
