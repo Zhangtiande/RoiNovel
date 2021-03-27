@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">RoiNovel</string>
+    <string name="Search">输入小说名字</string>
+    <string name="name">Name</string>
+    <string name="NovelDefaultName">斗破苍穹</string>
+    <string name="SearchButton">搜索</string>
+</resources>
